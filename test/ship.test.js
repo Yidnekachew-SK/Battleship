@@ -1,9 +1,9 @@
-const Ship = require('../src/ship');
+import {Ship} from '../src/ship';
 
 let ship;
 beforeEach(() => {
 	ship = new Ship(3);
-})
+});
 
 test("ship starts with given length", () => {
 	expect(ship.length).toBe(3);
