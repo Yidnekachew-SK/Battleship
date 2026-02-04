@@ -68,14 +68,9 @@ const GameBoard = function() {
 	};
 
 	const gameOver = function () {
-		for(let i = 0; i < shipList.length; i++){
-			if (shipList[i].isSunk === false) {
-				return false;
-			}
-
-			return true;
-		}
+		return shipList.length > 0 && shipList.every(ship => ship.isSunk());
 	};
+
 
 	return { grid, createGrid, placeShip, recieveAttack, gameOver };
 }
