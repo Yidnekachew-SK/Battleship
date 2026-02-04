@@ -1,4 +1,3 @@
-import "./styles.css";
 function renderBoard(boardElement, gameboard, showShips = false, isEnemy = false, onAttack = null) {
   boardElement.innerHTML = "";
 
@@ -22,4 +21,62 @@ function renderBoard(boardElement, gameboard, showShips = false, isEnemy = false
   }
 }
 
-export {renderBoard}
+function enableShipPlacement(boardElement, gameboard, getSelectedShip, getOrientation, updateBoards) {
+  const cells = boardElement.querySelectorAll(".cell");
+
+  cells.forEach((cell, index) => {
+    const x = Math.floor(index / 10);
+    const y = index % 10;
+
+    cell.addEventListener("mouseenter", () => {
+      const shipType = getSelectedShip();
+      if (!shipType) return;
+
+      const btn = document.querySelector(`#ship-controls button[data-ship="${shipType}"]`);
+      if (!btn || btn.disabled) return;
+
+      cells.forEach(c => c.classList.remove("preview-valid", "preview-invalid"));
+
+      const length = gameboard.getShipLength(shipType);
+      const valid = gameboard.canPlaceShip(x, y, shipType, getOrientation());
+
+      for (let i = 0; i < length; i++) {
+        const targetIndex = getOrientation() === "horizontal"
+          ? x * 10 + (y + i)
+          : (x + i) * 10 + y;
+
+        if (cells[targetIndex]) {
+          cells[targetIndex].classList.add(valid ? "preview-valid" : "preview-invalid");
+        }
+      }
+    });
+
+    cell.addEventListener("mouseleave", () => {
+      cells.forEach(c => c.classList.remove("preview-valid", "preview-invalid"));
+    });
+
+    cell.addEventListener("click", () => {
+      const shipType = getSelectedShip();
+      if (!shipType) return;
+
+      const btn = document.querySelector(`#ship-controls button[data-ship="${shipType}"]`);
+      if (!btn || btn.disabled) return;
+
+      const placed = gameboard.placeShip(shipType, [x, y], getOrientation());
+      if (placed) {
+        updateBoards();
+        cells.forEach(c => c.classList.remove("preview-valid", "preview-invalid"));
+
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.remove("active");
+        }
+      } else {
+        alert("Invalid placement!");
+      }
+    });
+  });
+}
+
+
+export { renderBoard, enableShipPlacement };

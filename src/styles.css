@@ -1,31 +1,45 @@
-*{
-  border: 1px solid red;
+body {
+  font-family: Arial, sans-serif;
+  background-color: lightgray;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
-h1,h2 {
-  text-align: center;
+h1 {
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 #boards {
   display: flex;
-  justify-content: space-evenly;
   align-items: center;
+  justify-content: space-evenly;
 }
 
-.board {
+#player-board,
+#computer-board {
+  border: 2px solid red;
+  padding: 5px;
   display: grid;
   grid-template-columns: repeat(10, 30px);
   grid-template-rows: repeat(10, 30px);
   gap: 2px;
-  margin: 20px;
+  margin: 20px auto;
+  width: max-content;
 }
 
 .cell {
   width: 30px;
   height: 30px;
-  background-color: lightblue;
   border: 1px solid #333;
+  background-color: #4ecdf6;
+  box-sizing: border-box;
   cursor: pointer;
+}
+
+.cell.ship {
+  background-color: lightgreen;
 }
 
 .cell.hit {
@@ -33,9 +47,41 @@ h1,h2 {
 }
 
 .cell.miss {
-  background-color: gray;
+  background-color: lightgray;
 }
 
-.ship {
-  background-color: lightgreen;
+.cell.preview-valid {
+  background-color: lightgreen !important;
 }
+
+.cell.preview-invalid {
+  background-color: lightcoral !important;
+}
+
+#controls {
+  margin: 20px;
+}
+
+#ship-controls button {
+  margin: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+#ship-controls button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+#ship-controls button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+#toggle-orientation,
+#reset-game {
+  margin: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+

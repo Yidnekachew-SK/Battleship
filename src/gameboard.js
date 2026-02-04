@@ -1,78 +1,101 @@
-import {Ship} from "./ship.js";
+import { Ship } from "./ship.js";
 
-const GameBoard = function() {
-	let grid = Array.from({ length: 10 }, () => new Array(10));
-	let missedGrids = [];
-	let shipList = [];
+const GameBoard = function () {
+  let grid = Array.from({ length: 10 }, () => new Array(10));
+  let shipList = [];
 
-	const createGrid = function () {
-		for (let i = 0; i < 10; i++){
-			for(let j = 0; j < 10; j++){
-				grid[i][j] = {
-					isHit: null,
-					shipType: null
-				};
-			}
-		}
-	};
+  const shipLengths = {
+    carrier: 5,
+    battleship: 4,
+    cruiser: 3,
+    submarine: 3,
+    destroyer: 2,
+  };
 
-	const checkOutOfBound = function (ship, coordinate, alignment) {
-		if (alignment === "horizontal") {
-			if ((ship.length + coordinate[1]) > 10) {
-				return false;
-			}
-		} else if (alignment === "vertical") {
-			if ((ship.length + coordinate[0]) > 10) {
-				return false;
-			}
-		}
+  const createGrid = function () {
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        grid[i][j] = {
+          isHit: null,
+          shipType: null,
+          ship: null
+        };
+      }
+    }
+  };
 
-		return true;
-	}
+  const getShipLength = function (shipType) {
+    return shipLengths[shipType];
+  };
 
-	const placeShip = function (ship, coordinate, alignment) {
-		let x = coordinate[0];
-		let y = coordinate[1];
+  const canPlaceShip = function (x, y, shipType, alignment) {
+    const length = getShipLength(shipType);
 
-		if (checkOutOfBound(ship, coordinate, alignment) === false) {
-			return "not allowed";
-		};
+    if (alignment === "horizontal") {
+      if (y + length > 10) return false;
+      for (let i = 0; i < length; i++) {
+        if (grid[x][y + i].ship !== null) return false;
+      }
+    } else {
+      if (x + length > 10) return false;
+      for (let i = 0; i < length; i++) {
+        if (grid[x + i][y].ship !== null) return false;
+      }
+    }
+    return true;
+  };
 
-		if (alignment === "horizontal" && grid[x][y].shipType === null) {
-			for(let i = 0; i < ship.length; i++){
-				grid[x][y + i].shipType = ship;
-			}
-			shipList.push(ship);
-		} else if(alignment === "vertical" && grid[x][y].shipType === null){
-			for(let i = 0; i < ship.length; i++){
-				grid[x + i][y].shipType = ship;
-			}
-			shipList.push(ship);
-		} else {
-			return "not allowed";
-		}
-		
-	};
+  const placeShip = function (shipType, coordinate, alignment) {
+    const x = coordinate[0];
+    const y = coordinate[1];
+    const length = getShipLength(shipType);
 
-	const recieveAttack = function (x,y) {
-		if (grid[x][y].isHit !== null) { 
-			return "already attacked";
-		};
-		if (grid[x][y].shipType != null) {
-			grid[x][y].shipType.hit();
-			grid[x][y].isHit = "hit";
-		} else {
-			grid[x][y].isHit = "miss";
-			missedGrids.push([x,y]);
-		}
-	};
+    if (!canPlaceShip(x, y, shipType, alignment)) return false;
 
-	const gameOver = function () {
-		return shipList.length > 0 && shipList.every(ship => ship.isSunk());
-	};
+    const ship = Ship(length);
+    ship.type = shipType;
+
+    if (alignment === "horizontal") {
+      for (let i = 0; i < length; i++) {
+        grid[x][y + i].shipType = shipType;
+        grid[x][y + i].ship = ship;
+      }
+    } else {
+      for (let i = 0; i < length; i++) {
+        grid[x + i][y].shipType = shipType;
+        grid[x + i][y].ship = ship;
+      }
+    }
+
+    shipList.push(ship);
+    return true;
+  };
+
+  const recieveAttack = function (x, y) {
+    if (grid[x][y].isHit !== null) return "already attacked";
+    if (grid[x][y].ship) {
+      grid[x][y].ship.hit();
+      grid[x][y].isHit = "hit";
+    } else {
+      grid[x][y].isHit = "miss";
+    }
+  };
+
+  const reset = function () {
+    createGrid();
+    shipList = [];
+  };
+
+  const isShipPlaced = function (shipType) {
+    return shipList.some(ship => ship.type === shipType);
+  };
 
 
-	return { grid, createGrid, placeShip, recieveAttack, gameOver };
-}
+  const gameOver = function () {
+    return shipList.length > 0 && shipList.every(ship => ship.isSunk());
+  };
 
-export {GameBoard};
+  return { grid, createGrid, getShipLength, canPlaceShip, placeShip, recieveAttack, reset, gameOver, isShipPlaced };
+};
+
+export { GameBoard };
